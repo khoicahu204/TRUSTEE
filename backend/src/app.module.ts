@@ -8,6 +8,7 @@ import { DonationCase } from './donation-case/donation-case.entity';
 import { DonationTransaction } from './donation-transaction/donation-transaction.entity';
 import { User } from './user/user.entity';
 import { DonationTransactionModule } from './donation-transaction/donation-transaction.module';
+import { CaseImage } from './donation-case/case-image.entity';
 console.log('💥 AppModule loaded');
 console.log('✅ Importing AuthModule...');
 
@@ -16,13 +17,14 @@ console.log('✅ Importing AuthModule...');
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'charityapp.sqlite',
-      entities: [User, DonationCase, DonationTransaction],
+      entities: [User, DonationCase, DonationTransaction, CaseImage],
       synchronize: true,
     }),
     AuthModule,
     UserModule,
     DonationCaseModule,
     DonationTransactionModule,
+    
   ],
 })
 export class AppModule {}

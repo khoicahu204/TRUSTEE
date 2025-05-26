@@ -1,27 +1,35 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    CreateDateColumn,
-  } from 'typeorm';
-  import { User } from '../user/user.entity';
-  import { DonationCase } from '../donation-case/donation-case.entity';
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../user/user.entity';
+import { DonationCase } from '../donation-case/donation-case.entity';
+
+@Entity('donation_transactions')
+export class DonationTransaction {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('int')
+  amount: number;
+
+  @Column({ default: 'manual' })
+  payment_method: 'momo' | 'bank_transfer' | 'manual';
+
+  @CreateDateColumn()
+  created_at: Date;
+
   
-  @Entity()
-  export class DonationTransaction {
-    @PrimaryGeneratedColumn()
-    id: number;
-  
-    @Column('int')
-    amount: number;
-  
-    @CreateDateColumn()
-    donatedAt: Date;
-  
-    @ManyToOne(() => User, (user) => user.donations, { eager: true })
-    donor: User;
-  
-    @ManyToOne(() => DonationCase, (donationCase) => donationCase.donationTransactions, { eager: true, onDelete: 'CASCADE' })
-    donationCase: DonationCase;
-  }
+
+  @ManyToOne(() => User, (user) => user.donationTransactions, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @ManyToOne(() => DonationCase, (donationCase) => donationCase.donationTransactions, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'case_id' })
+  donationCase: DonationCase;
+}

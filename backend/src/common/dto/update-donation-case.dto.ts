@@ -1,16 +1,10 @@
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
+// update-donation-case.dto.ts
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateDonationCaseDto } from './donation-case.dto';
+import { IsOptional, IsEnum } from 'class-validator';
 
-export class UpdateDonationCaseDto {
+export class UpdateDonationCaseDto extends PartialType(CreateDonationCaseDto) {
   @IsOptional()
-  @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  goalAmount?: number;
+  @IsEnum(['pending', 'approved', 'rejected'])
+  status?: 'pending' | 'approved' | 'rejected';
 }

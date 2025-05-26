@@ -1,5 +1,5 @@
 
-import { IsNotEmpty, IsString, IsInt, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, Min, IsOptional, IsArray, ArrayMaxSize, IsUrl } from 'class-validator';
 
 export class CreateDonationCaseDto {
   @IsNotEmpty()
@@ -12,5 +12,11 @@ export class CreateDonationCaseDto {
 
   @IsInt()
   @Min(1)
-  goalAmount: number;
+  target_amount: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsUrl({}, { each: true })
+  images?: string[];
 }

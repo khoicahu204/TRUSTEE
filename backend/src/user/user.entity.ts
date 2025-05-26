@@ -1,7 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { DonationCase } from '../donation-case/donation-case.entity';
 import { DonationTransaction } from '../donation-transaction/donation-transaction.entity';
-@Entity()
+
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,12 +22,18 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'user' }) // mặc định role là "user"
-  role: string;
+  @Column({ default: 'user' })
+  role: 'user' | 'admin';
 
-  @OneToMany(() => DonationCase, (donationCase) => donationCase.createdBy)
+  @Column({ nullable: true })
+  avatar_url: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @OneToMany(() => DonationCase, (donationCase) => donationCase.user)
   donationCases: DonationCase[];
 
-  @OneToMany(() => DonationTransaction, (tx) => tx.donor)
-  donations: DonationTransaction[];
+  @OneToMany(() => DonationTransaction, (tx) => tx.user)
+  donationTransactions: DonationTransaction[];
 }

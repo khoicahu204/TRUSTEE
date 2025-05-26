@@ -14,7 +14,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(data: { name: string; email: string; password: string }) {
+  async register(data: { name: string; email: string; password: string; avatar_url?: string; }) {
     const existing = await this.userRepo.findOneBy({ email: data.email });
     if (existing) {
       throw new ConflictException('Email đã tồn tại');

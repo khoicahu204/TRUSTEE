@@ -22,23 +22,39 @@ export class DonationCaseService {
   ) {}
 
   async createCase(
-    data: { title: string; description: string; goalAmount: number },
-    user: User,
-  ) {
-    const newCase = this.caseRepo.create({
-      ...data,
-      createdBy: user,
-    });
-    return this.caseRepo.save(newCase);
-  }
+  data: {
+    title: string;
+    description: string;
+    target_amount: number;
+    images?: string[]; // ✅ thêm images nếu có
+  },
+  user: User,
+) {
+  // Chuyển mảng string[] thành CaseImage[]
+  const imageEntities = Array.isArray(data.images)
+    ? data.images
+        .filter((url) => typeof url === 'string' && url.trim() !== '')
+        .map((url) => ({ image_url: url }))
+    : [];
 
+  const newCase = this.caseRepo.create({
+    title: data.title,
+    description: data.description,
+    target_amount: data.target_amount,
+    status: 'pending', // gán mặc định
+    user,
+    images: imageEntities, // ✅ gán images đã xử lý kỹ
+  });
+
+  return this.caseRepo.save(newCase);
+}
   async donateToCase(caseId: number, amount: number, user: User) {
     const donationCase = await this.caseRepo.findOneBy({ id: caseId });
     if (!donationCase) throw new Error('Không tìm thấy case');
 
     const transaction = this.txRepo.create({
       amount,
-      donor: user,
+      user: user,
       donationCase,
     });
 
@@ -66,7 +82,7 @@ export class DonationCaseService {
         id: c.id,
         title: c.title,
         description: c.description,
-        goalAmount: c.goalAmount,
+        target_amount: c.target_amount,
         currentAmount: totalDonated,
         status: c.status,
       };
@@ -105,14 +121,14 @@ export class DonationCaseService {
       0;
 
     const progress = Math.min(
-      Math.round((currentAmount / theCase.goalAmount) * 100),
+      Math.round((currentAmount / theCase.target_amount) * 100),
       100,
     );
 
     return {
       id: theCase.id,
       title: theCase.title,
-      goalAmount: theCase.goalAmount,
+      target_amount: theCase.target_amount,
       currentAmount,
       progressPercent: progress,
     };
@@ -122,7 +138,7 @@ export class DonationCaseService {
     return this.caseRepo.find({
       where: { status: 'pending' },
       relations: ['createdBy'],
-      order: { createdAt: 'DESC' },
+      order: { created_at: 'DESC' },
     });
   }
 
@@ -147,7 +163,7 @@ export class DonationCaseService {
       throw new NotFoundException('Case không tồn tại');
     }
 
-    if (donationCase.createdBy.id !== user.id) {
+    if (donationCase.user.id !== user.id) {
       throw new ForbiddenException('Bạn không có quyền sửa case này');
     }
 
