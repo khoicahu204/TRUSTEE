@@ -7,8 +7,13 @@ import {
   UseGuards,
   Param,
   Patch,
-  NotFoundException,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { DonationCaseService } from './donation-case.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User as UserDecorator } from '../common/decorators/user.decorator';
@@ -55,17 +60,22 @@ export class DonationCaseController {
   }
 
   @Post()
-  createCase(@Body() body: CreateDonationCaseDto, @UserDecorator() user: User) {
-    return this.donationCaseService.createCase(body, user);
-  }
+@UseGuards(AuthGuard('jwt'))
+createCase(
+  @Body() data: CreateDonationCaseDto,
+  @UserDecorator() user: User,
+) {
+  return this.donationCaseService.createCase(data, user);
+}
 
-  @Post(':id/donate')
+   @Post(':id/donate')
+  @UseGuards(AuthGuard('jwt'))
   donateToCase(
     @Param('id') caseId: number,
-    @Body() body: CreateDonationDto, // ✅ dùng DTO cho donation
+    @Body() body: { amount: number; password: string },
     @UserDecorator() user: User,
   ) {
-    return this.donationCaseService.donateToCase(caseId, body.amount, user);
+    return this.donationCaseService.donateToCase(caseId, body.amount, body.password, user);
   }
 
   @Get()
@@ -81,5 +91,23 @@ export class DonationCaseController {
   @Get(':id')
   getCaseDetail(@Param('id') id: number) {
     return this.donationCaseService.getCaseDetail(id);
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `case_image_${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  )
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    const url = `/uploads/${file.filename}`;
+    return { filename: file.filename, url };
   }
 }

@@ -31,6 +31,9 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
+  @Column({ type: 'int', default: 0 })
+  balance: number;
+
   @OneToMany(() => DonationCase, (donationCase) => donationCase.user)
   donationCases: DonationCase[];
 

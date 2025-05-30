@@ -23,27 +23,5 @@ export class DonationTransactionService {
     });
   }
 
-  async donateToCase(
-    caseId: number,
-    amount: number,
-    payment_method: 'momo' | 'bank_transfer' | 'manual',
-    user: User,
-  ) {
-    const donationCase = await this.caseRepo.findOneBy({ id: caseId });
-    if (!donationCase) {
-      throw new NotFoundException('Không tìm thấy trường hợp cần giúp đỡ');
-    }
-
-    donationCase.current_amount += amount;
-    await this.caseRepo.save(donationCase);
-
-    const transaction = this.donationRepo.create({
-      amount,
-      payment_method,
-      user,
-      donationCase,
-    });
-
-    return this.donationRepo.save(transaction);
-  }
+  
 }

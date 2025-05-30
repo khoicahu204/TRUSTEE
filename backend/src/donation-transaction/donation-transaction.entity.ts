@@ -17,8 +17,7 @@ export class DonationTransaction {
   @Column('int')
   amount: number;
 
-  @Column({ default: 'manual' })
-  payment_method: 'momo' | 'bank_transfer' | 'manual';
+  
 
   @CreateDateColumn()
   created_at: Date;
